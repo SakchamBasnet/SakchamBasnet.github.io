@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Build Log — Saksham Basnet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0806;
+    --glass:rgba(232,200,160,.045);
+    --glass-brd:rgba(232,168,85,.14);
+    --ink:#F2E9DC;
+    --ink-dim:#A79A88;
+    --amber:#E8A855;
+    --amber-soft:#C98A45;
+    --denim:#93AFC7;
+    --rust:#B5623A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg); color:var(--ink); font-family:'Inter',sans-serif;
+    line-height:1.6; overflow-x:hidden; position:relative;
+  }
+  ::selection{background:var(--amber); color:#0A0806;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
+
+  .bg-orbs{position:fixed; inset:0; z-index:0; overflow:hidden; pointer-events:none;}
+  .orb{position:absolute; border-radius:50%; filter:blur(110px); opacity:.24;}
+  .orb1{width:480px; height:480px; background:var(--amber); top:-180px; left:-140px; animation:float1 20s ease-in-out infinite;}
+  .orb2{width:420px; height:420px; background:var(--denim); bottom:-160px; right:-120px; animation:float2 24s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(70px,90px) scale(1.15);}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(-80px,-60px) scale(1.1);}}
+  .grain{position:fixed; inset:0; pointer-events:none; opacity:.035; z-index:1;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  nav{position:sticky; top:0; z-index:30; backdrop-filter:blur(16px); background:rgba(10,8,6,.6); border-bottom:1px solid var(--glass-brd);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:16px 28px; flex-wrap:wrap; gap:10px;}
+  .brand{font-family:'IBM Plex Mono',monospace; font-size:13px; letter-spacing:.08em; color:var(--ink-dim);}
+  .brand span{background:linear-gradient(90deg,var(--amber),var(--denim)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .back-link{font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--ink-dim); display:flex; align-items:center; gap:6px; transition:color .2s;}
+  .back-link:hover{color:var(--amber);}
+  .back-link svg{width:13px; height:13px; fill:currentColor;}
+
+  .reveal{opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1; transform:translateY(0);}
+
+  header.page-head{padding:56px 0 40px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:12.5px; letter-spacing:.16em; text-transform:uppercase; margin-bottom:14px; display:flex; align-items:center; gap:10px; color:var(--amber);}
+  .eyebrow::before{content:''; width:24px; height:1px; background:linear-gradient(90deg,var(--amber),transparent);}
+  .eyebrow .dot{width:6px; height:6px; border-radius:50%; background:var(--amber); box-shadow:0 0 10px var(--amber); animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:.35;}}
+  h1{font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:clamp(32px,5vw,48px); line-height:1.05; margin-bottom:14px;}
+  .gradient-text{
+    background:linear-gradient(90deg,var(--amber),var(--rust),var(--denim),var(--amber));
+    background-size:300% auto; -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:gradientShift 7s linear infinite;
+  }
+  @keyframes gradientShift{to{background-position:300% center;}}
+  .page-sub{color:var(--ink-dim); font-size:15.5px; max-width:60ch;}
+
+  section{padding:44px 0; border-top:1px solid var(--glass-brd);}
+  header.page-head{border-top:none;}
+  .sec-title{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:22px; margin-bottom:24px;}
+
+  /* ---------- STREAK STATS ---------- */
+  .stat-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; margin-bottom:34px;}
+  .stat-card{
+    background:var(--glass); border:1px solid var(--glass-brd); backdrop-filter:blur(12px);
+    border-radius:14px; padding:20px 22px; text-align:center;
+  }
+  .stat-num{font-family:'Space Grotesk',sans-serif; font-size:32px; font-weight:700; color:var(--amber); line-height:1;}
+  .stat-num.denim{color:var(--denim);}
+  .stat-label{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-dim); letter-spacing:.05em; margin-top:8px; text-transform:uppercase;}
+
+  /* ---------- HEATMAP ---------- */
+  .heatmap-card{
+    background:var(--glass); border:1px solid var(--glass-brd); backdrop-filter:blur(14px);
+    border-radius:18px; padding:26px 26px 22px; overflow-x:auto;
+  }
+  .heatmap-inner{display:inline-block; min-width:100%;}
+  .month-row{display:flex; gap:3px; margin-bottom:6px; padding-left:0;}
+  .month-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--ink-dim); width:12px; flex-shrink:0;}
+  .heatmap{display:flex; gap:3px;}
+  .heatmap-week{display:flex; flex-direction:column; gap:3px;}
+  .heatmap-day{
+    width:12px; height:12px; border-radius:3px; background:rgba(232,200,160,.06);
+    border:1px solid rgba(232,168,85,.08);
+  }
+  .heatmap-day[data-level="1"]{background:rgba(232,168,85,.28); border-color:rgba(232,168,85,.2);}
+  .heatmap-day[data-level="2"]{background:rgba(232,168,85,.52); border-color:rgba(232,168,85,.3);}
+  .heatmap-day[data-level="3"]{background:rgba(232,168,85,.76); border-color:rgba(232,168,85,.4);}
+  .heatmap-day[data-level="4"]{background:linear-gradient(135deg,var(--amber),var(--rust)); border-color:var(--amber);}
+  .heatmap-legend{display:flex; align-items:center; gap:6px; margin-top:16px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-dim);}
+  .heatmap-legend .heatmap-day{width:10px; height:10px;}
+
+  /* ---------- FILTERS ---------- */
+  .filter-row{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:24px;}
+  .filter-chip{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:.04em;
+    padding:8px 16px; border-radius:20px; border:1px solid var(--glass-brd); background:var(--glass);
+    color:var(--ink-dim); cursor:pointer; transition:all .25s;
+  }
+  .filter-chip:hover{border-color:var(--amber); color:var(--ink);}
+  .filter-chip.active{border-color:var(--amber); color:var(--amber); background:rgba(232,168,85,.08);}
+
+  /* ---------- JOURNAL ENTRIES ---------- */
+  .month-group{margin-bottom:30px;}
+  .month-heading{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--amber); letter-spacing:.08em; margin-bottom:14px; text-transform:uppercase;}
+  .journal-feed{display:flex; flex-direction:column; gap:14px;}
+  .journal-entry{
+    background:var(--glass); border:1px solid var(--glass-brd); backdrop-filter:blur(12px);
+    border-radius:14px; padding:20px 24px; position:relative; overflow:hidden;
+  }
+  .journal-entry::before{content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--amber);}
+  .journal-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;}
+  .journal-date{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-dim); letter-spacing:.05em;}
+  .journal-type{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; padding:3px 11px; border-radius:20px;
+    border:1px solid; text-transform:uppercase; letter-spacing:.06em; white-space:nowrap;
+  }
+  .journal-type.progress{color:#8FD1A5; border-color:rgba(143,209,165,.3); background:rgba(143,209,165,.06);}
+  .journal-type.note{color:var(--denim); border-color:rgba(147,175,199,.3); background:rgba(147,175,199,.06);}
+  .journal-type.journal{color:var(--amber); border-color:rgba(232,168,85,.3); background:rgba(232,168,85,.06);}
+  .journal-entry p{color:var(--ink-dim); font-size:14.5px; line-height:1.6; margin-bottom:10px;}
+  .journal-entry p:last-child{margin-bottom:0;}
+  .journal-loading, .journal-empty{font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--ink-dim); padding:20px 0;}
+
+  footer{padding:50px 0 40px;}
+  .foot-bottom{
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-dim);
+  }
+
+  @media (max-width:640px){
+    .stat-num{font-size:26px;}
+    .heatmap-day{width:9px; height:9px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important;}
+  }
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div></div>
+<div class="grain"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">SAKSHAM<span>.BASNET</span></div>
+    <a class="back-link" href="index.html">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></svg>
+      Back to portfolio
+    </a>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span>Daily build log</div>
+    <h1>Streak &amp; <span class="gradient-text">Journal.</span></h1>
+    <p class="page-sub">
+      Every day I show up for the agency &mdash; a quick log, a note, a lesson &mdash; gets marked here.
+      This is the unfiltered version: the full history, not just the highlights.
+    </p>
+  </div>
+</header>
+
+<section id="streak">
+  <div class="wrap">
+    <div class="sec-title reveal">Streak</div>
+    <div class="stat-row reveal">
+      <div class="stat-card">
+        <div class="stat-num" id="currentStreak">—</div>
+        <div class="stat-label">Current streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num denim" id="longestStreak">—</div>
+        <div class="stat-label">Longest streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="totalDays">—</div>
+        <div class="stat-label">Days logged</div>
+      </div>
+    </div>
+    <div class="heatmap-card reveal">
+      <div class="heatmap-inner">
+        <div id="heatmap" class="heatmap"></div>
+      </div>
+      <div class="heatmap-legend">
+        <span>Less</span>
+        <div class="heatmap-day" data-level="0"></div>
+        <div class="heatmap-day" data-level="1"></div>
+        <div class="heatmap-day" data-level="2"></div>
+        <div class="heatmap-day" data-level="3"></div>
+        <div class="heatmap-day" data-level="4"></div>
+        <span>More</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="log">
+  <div class="wrap">
+    <div class="sec-title reveal">Full Journal &amp; Notes</div>
+    <div class="filter-row reveal">
+      <button class="filter-chip active" data-filter="all">All</button>
+      <button class="filter-chip" data-filter="progress">Progress</button>
+      <button class="filter-chip" data-filter="note">Notes</button>
+      <button class="filter-chip" data-filter="journal">Journal</button>
+    </div>
+    <div id="logFeed" class="reveal">
+      <div class="journal-loading">Loading entries&hellip;</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-bottom">
+      <div>SAKSHAM BASNET &mdash; BUILDING MY OWN PATH</div>
+      <div>DAILY BUILD LOG</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold:0.1 });
+  revealEls.forEach(el=>io.observe(el));
+
+  let allEntries = [];
+
+  function toISODate(d){
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function buildHeatmap(entries){
+    const counts = {};
+    entries.forEach(e=>{
+      const key = e.date;
+      counts[key] = (counts[key]||0) + 1;
+    });
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const start = new Date(today);
+    start.setDate(start.getDate() - 364);
+    // roll back to the preceding Sunday so weeks align like GitHub's graph
+    const startDow = start.getDay();
+    start.setDate(start.getDate() - startDow);
+
+    const heatmapEl = document.getElementById('heatmap');
+    heatmapEl.innerHTML = '';
+    let cursor = new Date(start);
+    let currentWeek = null;
+    let weekIndex = -1;
+
+    while(cursor <= today){
+      const dow = cursor.getDay();
+      if(dow === 0){
+        currentWeek = document.createElement('div');
+        currentWeek.className = 'heatmap-week';
+        heatmapEl.appendChild(currentWeek);
+        weekIndex++;
+      }
+      const dayEl = document.createElement('div');
+      dayEl.className = 'heatmap-day';
+      const iso = toISODate(cursor);
+      const count = counts[iso] || 0;
+      let level = 0;
+      if(count >= 4) level = 4;
+      else if(count === 3) level = 3;
+      else if(count === 2) level = 2;
+      else if(count === 1) level = 1;
+      dayEl.dataset.level = String(level);
+      dayEl.title = iso + (count ? ' \u2014 ' + count + ' entr' + (count===1?'y':'ies') : ' \u2014 no entry');
+      if(currentWeek) currentWeek.appendChild(dayEl);
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // streak math
+    const daySet = new Set(Object.keys(counts));
+    let longest = 0, run = 0;
+    let d = new Date(start);
+    while(d <= today){
+      if(daySet.has(toISODate(d))){ run++; longest = Math.max(longest, run); }
+      else { run = 0; }
+      d.setDate(d.getDate()+1);
+    }
+
+    let current = 0;
+    let pointer = new Date(today);
+    if(!daySet.has(toISODate(pointer))){
+      pointer.setDate(pointer.getDate()-1); // grace: today not logged yet
+    }
+    while(daySet.has(toISODate(pointer))){
+      current++;
+      pointer.setDate(pointer.getDate()-1);
+    }
+
+    document.getElementById('currentStreak').textContent = current;
+    document.getElementById('longestStreak').textContent = longest;
+    document.getElementById('totalDays').textContent = daySet.size;
+  }
+
+  function formatEntryText(text){
+    const escDiv = document.createElement('div');
+    escDiv.textContent = text || '';
+    const escaped = escDiv.innerHTML;
+    const paragraphs = escaped.split(/\n\s*\n/);
+    return paragraphs.map(p => '<p>' + p.split('\n').join('<br>') + '</p>').join('');
+  }
+
+  function renderLog(filter){
+    const feed = document.getElementById('logFeed');
+    const filtered = filter === 'all' ? allEntries : allEntries.filter(e=>e.type === filter);
+    if(!filtered.length){
+      feed.innerHTML = '<div class="journal-empty">Nothing here yet.</div>';
+      return;
+    }
+    const sorted = filtered.slice().sort((a,b)=> new Date(b.date) - new Date(a.date));
+    const groups = {};
+    sorted.forEach(e=>{
+      const d = new Date(e.date);
+      const key = d.toLocaleDateString('en-US', { year:'numeric', month:'long' });
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(e);
+    });
+    feed.innerHTML = Object.keys(groups).map(monthKey=>{
+      const items = groups[monthKey].map(e=>{
+        const type = ['progress','note','journal'].includes(e.type) ? e.type : 'note';
+        const dateStr = new Date(e.date).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+        return `<div class="journal-entry">
+          <div class="journal-top">
+            <div class="journal-date">${dateStr}</div>
+            <div class="journal-type ${type}">${type}</div>
+          </div>
+          ${formatEntryText(e.text)}
+        </div>`;
+      }).join('');
+      return `<div class="month-group">
+        <div class="month-heading">${monthKey}</div>
+        <div class="journal-feed">${items}</div>
+      </div>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      renderLog(chip.dataset.filter);
+    });
+  });
+
+  fetch('./journal.json', { cache: 'no-store' })
+    .then(r=>{ if(!r.ok) throw new Error('not found'); return r.json(); })
+    .then(data=>{
+      allEntries = (data && data.entries) ? data.entries : [];
+      buildHeatmap(allEntries);
+      renderLog('all');
+    })
+    .catch(()=>{
+      document.getElementById('logFeed').innerHTML = '<div class="journal-empty">Could not load journal.json \u2014 make sure it\'s uploaded in the same folder as this page.</div>';
+      buildHeatmap([]);
+    });
+</script>
+
+</body>
+</html>
